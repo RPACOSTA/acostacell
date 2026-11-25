@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+export PATH="$PWD/.venv/bin:$PATH"
 export GRADIO_SERVER_PORT="${GRADIO_SERVER_PORT:-7860}"
 log=.venv/voice-studio.log
 lock=".venv/voice-studio-${GRADIO_SERVER_PORT}.lock"

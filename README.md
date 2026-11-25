@@ -23,7 +23,7 @@ Estúdio Gradio em português brasileiro para narrações e diálogos com [Pocke
 
 ## Usar pelo GitHub Codespaces
 
-[Crie um Codespace na branch `main`](https://codespaces.new/RPACOSTA/acostacell?ref=main). O Codespace instala as dependências e abre o estúdio no navegador pela porta **7860**. Se a aba do estúdio não abrir automaticamente, selecione **Ports → Rick's Voice Studio → Open in Browser**.
+[Crie um Codespace na branch `main`](https://codespaces.new/RPACOSTA/acostacell?ref=main). O Codespace instala as dependências e o FFmpeg sem precisar de `sudo` e abre o estúdio no navegador pela porta **7860**. Se a aba do estúdio não abrir automaticamente, selecione **Ports → Rick's Voice Studio → Open in Browser**.
 
 A porta é privada por padrão. Pare o Codespace ao terminar para conservar a cota da conta. Caso o servidor precise ser iniciado manualmente, execute `bash .devcontainer/start.sh`. O log fica em `.venv/voice-studio.log`.
 
