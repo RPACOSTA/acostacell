@@ -55,6 +55,7 @@ body, gradio-app, .gradio-container { background: #0b1014; }
 .panel.panel { background: #121a20; padding: clamp(12px, 2vw, 20px); border: 1px solid #2b383f; border-radius: 16px; box-shadow: 0 12px 24px #060a0d42; gap: 12px; }
 .panel h2 { margin: 0; font-size: 1.05rem; letter-spacing: -.015em; }
 .script-input textarea { font-size: max(16px, 1rem); line-height: 1.58; }
+.generation-status { min-height: 3rem; }
 .character-count { text-align: right; }
 .character-count p { color: #a1afb7; font: .76rem var(--font-mono); margin: 0; }
 .panel button { min-height: 40px; }

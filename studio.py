@@ -182,7 +182,7 @@ class Engine:
         self, turns: list[tuple[str, str | bytes]], language: str, temp: float, steps: int,
         output_root: Path, progress: Callable, *, preview: bool = False,
     ) -> tuple[Path, Path | None]:
-        progress(0, desc="Preparando o Pocket TTS")
+        progress(0, desc="Carregando o Pocket TTS")
         model = self.load(language, temp, steps)
         if any(isinstance(voice, bytes) for _, voice in turns) and not model.has_voice_cloning:
             raise StudioError(
@@ -190,6 +190,7 @@ class Engine:
                 "Peça ao responsável pelo Space para configurar a credencial de leitura."
             )
 
+        progress(0.03, desc="Preparando as vozes")
         batches = [(list(sections(text)), voice) for text, voice in turns]
         total_chars = sum(len(section) for chunks, _ in batches for section in chunks)
         if total_chars == 0:

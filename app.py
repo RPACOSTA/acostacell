@@ -96,12 +96,21 @@ def remove_voice(name: str | None, library: dict[str, bytes], *current: str):
 
 
 def render_audio(turns, model: str, temp: float, steps: int, progress, *, preview: bool = False):
+    LOG.info("Geração recebida (%s)", model)
     try:
-        return ENGINE.export(turns, model, temp, steps, CACHE, progress, preview=preview)
+        audio = ENGINE.export(turns, model, temp, steps, CACHE, progress, preview=preview)
+        LOG.info("Geração concluída (%s)", model)
+        return audio
     except StudioError:
         raise
     except Exception as exc:
-        LOG.warning("Falha na geração com %s (%s)", model, type(exc).__name__)
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        LOG.warning("Falha na geração com %s (%s, HTTP %s)", model, type(exc).__name__, status or "—")
+        if status in (401, 403):
+            raise StudioError(
+                f"O Hugging Face recusou o download do Pocket TTS (HTTP {status}). "
+                "Confira o acesso ao modelo e a configuração do segredo HF_TOKEN."
+            ) from None
         raise StudioError(
             "Não foi possível gerar o áudio. Verifique a conexão e o acesso aos pesos do Pocket TTS, "
             "ou tente novamente com um trecho menor."
@@ -176,6 +185,10 @@ with gr.Blocks(title=TITLE, analytics_enabled=False, delete_cache=(600, 3600)) a
                     )
                     text_count = gr.Markdown(counter(""), elem_classes="character-count")
                     generate_btn = gr.Button("Gerar narração", variant="primary")
+                    narration_status = gr.Markdown(
+                        "Na primeira geração, o download do modelo pode levar alguns minutos.",
+                        elem_classes="generation-status",
+                    )
                 with gr.Tab("Diálogo"):
                     script = gr.Textbox(
                         label="Roteiro", info="Comece cada fala com [personagem]. Use uma nova linha para trocar de personagem.",
@@ -192,6 +205,10 @@ with gr.Blocks(title=TITLE, analytics_enabled=False, delete_cache=(600, 3600)) a
                             for _ in range(MAX_CHARACTERS)
                         ]
                     dialogue_btn = gr.Button("Gerar diálogo", variant="primary")
+                    dialogue_status = gr.Markdown(
+                        "Na primeira geração, o download do modelo pode levar alguns minutos.",
+                        elem_classes="generation-status",
+                    )
 
         with gr.Column(scale=2, min_width=290, elem_classes="panel settings"):
             gr.Markdown("## Voz e geração")
@@ -232,7 +249,6 @@ with gr.Blocks(title=TITLE, analytics_enabled=False, delete_cache=(600, 3600)) a
         with gr.Row():
             wav_button = gr.DownloadButton("Baixar WAV", interactive=False)
             mp3_button = gr.DownloadButton("Baixar MP3", interactive=False)
-        result = gr.Markdown("")
 
     count_event = {
         "queue": False, "api_visibility": "private", "trigger_mode": "always_last", "show_progress": "hidden",
@@ -254,17 +270,22 @@ with gr.Blocks(title=TITLE, analytics_enabled=False, delete_cache=(600, 3600)) a
     remove_btn.click(remove_voice, [saved, library, *selectors], library_outputs,
                      api_visibility="private", show_progress="hidden", **CPU_JOB)
     common = [model, temperature, steps, library]
-    output = [player, wav_button, mp3_button, result]
+    output = [player, wav_button, mp3_button]
     preview_btn.click(preview_voice, [voice, *common], audition, api_name="pre_escutar", **CPU_JOB)
-    generate_btn.click(generate, [text, voice, *common], output, api_name="gerar_narracao", **CPU_JOB)
+    generate_btn.click(
+        generate, [text, voice, *common], [*output, narration_status], api_name="gerar_narracao",
+        show_progress_on=narration_status, **CPU_JOB,
+    )
     dialogue_btn.click(
-        generate_dialogue, [script, *common, speakers, *assignments], output,
-        api_visibility="private", **CPU_JOB,
+        generate_dialogue, [script, *common, speakers, *assignments], [*output, dialogue_status],
+        api_visibility="private", show_progress_on=dialogue_status, **CPU_JOB,
     )
 
 demo.queue(max_size=12)
 
 def launch():
+    logging.basicConfig(level=logging.WARNING)
+    LOG.setLevel(logging.INFO)
     demo.launch(
         server_name="0.0.0.0",
         css_paths=Path(__file__).with_name("studio.css"),
