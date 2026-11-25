@@ -21,6 +21,14 @@ Estúdio Gradio em português brasileiro para narrações e diálogos com [Pocke
 - **Biblioteca** aceita até seis amostras autorizadas por sessão. A biblioteca é temporária. A interface permite pré-escutar cada voz com uma frase em português.
 - **Exportação** oferece WAV e MP3 e um player para reprodução no navegador.
 
+## Usar pelo GitHub Codespaces
+
+[Crie um Codespace na branch `main`](https://codespaces.new/RPACOSTA/acostacell?ref=main). O Codespace instala as dependências e abre o estúdio no navegador pela porta **7860**. Se a aba do estúdio não abrir automaticamente, selecione **Ports → Rick's Voice Studio → Open in Browser**.
+
+A porta é privada por padrão. Pare o Codespace ao terminar para conservar a cota da conta. Caso o servidor precise ser iniciado manualmente, execute `bash .devcontainer/start.sh`. O log fica em `.venv/voice-studio.log`.
+
+Para habilitar a clonagem de voz, aceite os termos do modelo e adicione um [segredo do Codespaces](https://github.com/settings/codespaces) chamado `HF_TOKEN` com permissão de leitura para `kyutai/pocket-tts` e acesso a este repositório GitHub. Depois de adicionar o segredo, reinicie o Codespace para carregar a credencial.
+
 ## Desenvolvimento
 
 Com Python 3.12 e FFmpeg disponíveis em Linux:
