@@ -2,8 +2,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-if ! getconf GNU_LIBC_VERSION >/dev/null 2>&1; then
-    echo "O PyTorch CPU do estúdio precisa de glibc. No VS Code do Codespace, execute Codespaces: Rebuild Container para carregar a imagem Debian do projeto." >&2
+if ! python3 -c 'import os, sys; sys.exit(not (os.confstr("CS_GNU_LIBC_VERSION") or "").startswith("glibc "))' 2>/dev/null; then
+    echo "O Python deste terminal não reportou glibc. O PyTorch CPU do estúdio usa a imagem Debian definida no projeto." >&2
+    echo "Se o Codespace já foi reconstruído, abra Codespaces: View Creation Log no VS Code para identificar o erro de criação." >&2
     exit 1
 fi
 
